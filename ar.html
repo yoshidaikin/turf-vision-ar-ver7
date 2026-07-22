@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#102d24">
+  <title>Turf Vision Live｜AR現場試作版</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="ar.css">
+</head>
+<body>
+  <main class="stage">
+    <video id="camera" playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <canvas id="analysisCanvas" width="240" height="180" hidden></canvas>
+
+    <header class="topbar">
+      <div>
+        <div class="brand">Turf Vision Live</div>
+        <div class="sub">Ver1.0 AR現場試作版</div>
+      </div>
+      <a href="index.html" class="back">通常診断</a>
+    </header>
+
+    <section class="metrics">
+      <div><span>判定</span><b id="grade">–</b></div>
+      <div><span>VARI</span><b id="vari">–</b></div>
+      <div><span>GLI</span><b id="gli">–</b></div>
+      <div><span>ドライ</span><b id="dry">–</b></div>
+      <div><span>低活性</span><b id="low">–</b></div>
+    </section>
+
+    <div id="diseaseHint" class="disease-hint hidden">病害疑い：ドライ型と異なる数値パターン</div>
+    <div id="message" class="message">「カメラ開始」を押してください。</div>
+
+    <section class="panel">
+      <div class="row two">
+        <label>芝種
+          <select id="species">
+            <option>ベント芝</option>
+            <option>コウライ芝</option>
+            <option>ティフトン・バミューダ</option>
+          </select>
+        </label>
+        <label>撮影補正
+          <select id="lightMode">
+            <option value="standard">標準</option>
+            <option value="shade">日陰</option>
+            <option value="sun">強い日差し</option>
+          </select>
+        </label>
+      </div>
+      <label class="opacity-label">色の透明度 <b id="opacityValue">58%</b>
+        <input id="opacity" type="range" min="20" max="85" value="58">
+      </label>
+      <div class="legend"><i class="good"></i>良好 <i class="watch"></i>要観察 <i class="pre"></i>ドライ予兆 <i class="severe"></i>反応強い</div>
+      <div class="buttons">
+        <button id="startBtn">カメラ開始</button>
+        <button id="pauseBtn" disabled>一時停止</button>
+        <button id="saveBtn" disabled>画面保存</button>
+      </div>
+      <p>試作版・現地確認を優先。表示は管理場所を抽出する補助情報です。病害名は確定しません。</p>
+    </section>
+  </main>
+  <script src="ar.js"></script>
+</body>
+</html>

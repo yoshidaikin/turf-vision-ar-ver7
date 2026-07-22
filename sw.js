@@ -1,5 +1,5 @@
-const CACHE = "turf-vision-v700";
-const ASSETS = ["./", "./index.html", "./app.js", "./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
+const CACHE = "turf-vision-live-v100";
+const ASSETS = ["./", "./index.html", "./app.js", "./ar.html", "./ar.css", "./ar.js", "./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -20,15 +20,15 @@ self.addEventListener("fetch", event => {
       fetch(request, {cache:"no-store"})
         .then(response => {
           const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put("./index.html",copy));
+          caches.open(CACHE).then(cache=>cache.put(request,copy));
           return response;
         })
-        .catch(()=>caches.match("./index.html"))
+        .catch(()=>caches.match(request).then(r=>r||caches.match("./index.html")))
     );
     return;
   }
   const url=new URL(request.url);
-  if(url.pathname.endsWith("/app.js") || url.pathname.endsWith("/manifest.json") || url.pathname.endsWith("/sw.js")){
+  if(url.pathname.endsWith("/app.js") || url.pathname.endsWith("/ar.js") || url.pathname.endsWith("/ar.css") || url.pathname.endsWith("/ar.html") || url.pathname.endsWith("/manifest.json") || url.pathname.endsWith("/sw.js")){
     event.respondWith(
       fetch(request,{cache:"no-store"})
         .then(response=>{
