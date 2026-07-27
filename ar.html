@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#102d24">
-  <title>Turf Vision Live｜AR現場試作版</title>
+  <title>Turf Vision Live｜AR現場巡回版</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="ar.css">
+  <link rel="stylesheet" href="ar.css?v=110">
 </head>
 <body>
   <main class="stage">
@@ -17,7 +17,7 @@
     <header class="topbar">
       <div>
         <div class="brand">Turf Vision Live</div>
-        <div class="sub">Ver1.0 AR現場試作版</div>
+        <div class="sub">Ver1.1 AR現場巡回版</div>
       </div>
       <a href="index.html" class="back">通常診断</a>
     </header>
@@ -30,7 +30,7 @@
       <div><span>低活性</span><b id="low">–</b></div>
     </section>
 
-    <div id="diseaseHint" class="disease-hint hidden">病害疑い：ドライ型と異なる数値パターン</div>
+    <div id="diseaseHint" class="disease-hint hidden">病害疑い：ドライ型とは異なる数値パターンです</div>
     <div id="message" class="message">「カメラ開始」を押してください。</div>
 
     <section class="panel">
@@ -50,18 +50,29 @@
           </select>
         </label>
       </div>
-      <label class="opacity-label">色の透明度 <b id="opacityValue">58%</b>
-        <input id="opacity" type="range" min="20" max="85" value="58">
-      </label>
+
+      <div class="row two second-row">
+        <label>表示方法
+          <select id="displayMode">
+            <option value="alert">異常優先表示</option>
+            <option value="redOnly">赤・オレンジのみ</option>
+            <option value="all">全体表示</option>
+          </select>
+        </label>
+        <label class="opacity-label">表示濃度 <b id="opacityValue">58%</b>
+          <input id="opacity" type="range" min="20" max="85" value="58">
+        </label>
+      </div>
+
       <div class="legend"><i class="good"></i>良好 <i class="watch"></i>要観察 <i class="pre"></i>ドライ予兆 <i class="severe"></i>反応強い</div>
       <div class="buttons">
         <button id="startBtn">カメラ開始</button>
         <button id="pauseBtn" disabled>一時停止</button>
         <button id="saveBtn" disabled>画面保存</button>
       </div>
-      <p>試作版・現地確認を優先。表示は管理場所を抽出する補助情報です。病害名は確定しません。</p>
+      <p>外周をゆっくり歩き、赤・オレンジが現れた場所へ近づいて目視確認してください。病害名や原因を確定するものではありません。</p>
     </section>
   </main>
-  <script src="ar.js"></script>
+  <script src="ar.js?v=110"></script>
 </body>
 </html>
