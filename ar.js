@@ -1,7 +1,7 @@
 const PRESETS={
-  "ベント芝":{vari:.055,gli:.095,exg:.135,pct:18,limits:[16,28,44,64]},
-  "コウライ芝":{vari:.010,gli:.045,exg:.070,pct:14,limits:[24,38,55,72]},
-  "ティフトン・バミューダ":{vari:-.005,gli:.035,exg:.055,pct:12,limits:[22,36,54,70]}
+  "????":{vari:.055,gli:.095,exg:.135,pct:18,limits:[16,28,44,64]},
+  "?????":{vari:.010,gli:.045,exg:.070,pct:14,limits:[24,38,55,72]},
+  "???????????":{vari:-.005,gli:.035,exg:.055,pct:12,limits:[22,36,54,70]}
 };
 const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const video=$("camera"),overlay=$("overlay"),work=$("analysisCanvas");
@@ -20,15 +20,15 @@ async function startCamera(){
     if(stream)stopCamera();
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
     video.srcObject=stream;await video.play();resizeOverlay();running=true;paused=false;temporalClasses=null;
-    $("startBtn").textContent="カメラ停止";$("pauseBtn").disabled=false;$("saveBtn").disabled=false;
-    setMessage("約0.5秒ごとに解析中。赤・オレンジの場所を現地確認してください。");schedule();
-  }catch(e){setMessage("カメラを開始できません。Chromeのカメラ許可とHTTPS接続を確認してください。");}
+    $("startBtn").textContent="?????";$("pauseBtn").disabled=false;$("saveBtn").disabled=false;
+    setMessage("?0.5?????????????????????????????");schedule();
+  }catch(e){setMessage("????????????Chrome???????HTTPS????????????");}
 }
 function stopCamera(){
   running=false;paused=false;clearTimeout(timer);stream?.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;
   octx.clearRect(0,0,overlay.width,overlay.height);temporalClasses=null;lastResult=null;
-  $("startBtn").textContent="カメラ開始";$("pauseBtn").textContent="一時停止";$("pauseBtn").disabled=true;$("saveBtn").disabled=true;
-  setMessage("カメラを停止しました。");
+  $("startBtn").textContent="?????";$("pauseBtn").textContent="????";$("pauseBtn").disabled=true;$("saveBtn").disabled=true;
+  setMessage("???????????");
 }
 function schedule(){clearTimeout(timer);if(running&&!paused)timer=setTimeout(analyzeFrame,500)}
 
@@ -42,7 +42,7 @@ function spatialSmooth(source,valid,w,h){
     }
     let best=source[i],bestCount=counts[best];
     for(let c=0;c<4;c++)if(counts[c]>bestCount){best=c;bestCount=counts[c]}
-    // 強い反応は消しすぎず、孤立点だけを周囲へなじませる
+    // ?????????????????????????
     out[i]=(source[i]===3&&counts[3]>=2)?3:(bestCount>=Math.ceil(total*.45)?best:source[i]);
   }
   return out;
@@ -54,9 +54,9 @@ function temporalSmooth(current,valid){
   for(let i=0;i<current.length;i++){
     if(!valid[i]){out[i]=0;continue}
     const prev=temporalClasses[i],now=current[i];
-    if(now>prev)out[i]=now;                       // 危険側は即時表示
+    if(now>prev)out[i]=now;                       // ????????
     else if(now===prev)out[i]=now;
-    else out[i]=(Math.random()<.32)?now:prev;     // 改善側はゆっくり戻す
+    else out[i]=(Math.random()<.32)?now:prev;     // ??????????
   }
   temporalClasses=out;return new Uint8Array(out);
 }
@@ -79,7 +79,7 @@ function analyzeFrame(){
       valid[i]=ok?1:0;brown[i]=(r>g*.92&&g>b*1.03&&r>b*1.12&&s>18&&v>35)?1:0;
       if(ok){vv.push(vari[i]);gg.push(gli[i]);ee.push(exg[i]);if(brown[i])brownCount++}
     }
-    if(vv.length<700){setMessage("芝として評価できる範囲が少ないです。芝面へ向けてください。");schedule();return}
+    if(vv.length<700){setMessage("?????????????????????????????");schedule();return}
 
     const bounds={v:[percentile(vv,5),percentile(vv,95)],g:[percentile(gg,5),percentile(gg,95)],e:[percentile(ee,5),percentile(ee,95)]};
     const scores=[],votes=new Uint8Array(n),score=new Float32Array(n);
@@ -90,7 +90,7 @@ function analyzeFrame(){
 
     const th=percentile(scores,pre.pct),rawClasses=new Uint8Array(n);let lowCount=0;
     for(let i=0;i<n;i++)if(valid[i]){
-      const low=species==="ベント芝"?(votes[i]>=2&&score[i]<=th):(score[i]<=th&&(votes[i]>=1||score[i]<th*.85));
+      const low=species==="????"?(votes[i]>=2&&score[i]<=th):(score[i]<=th&&(votes[i]>=1||score[i]<th*.85));
       let cls=0;
       if(low){cls=2;lowCount++;if(score[i]<th*.62||votes[i]>=3)cls=3}
       else if(score[i]<Math.min(.52,th*1.55))cls=1;
@@ -100,41 +100,84 @@ function analyzeFrame(){
     const classes=temporalSmooth(spatialSmooth(rawClasses,valid,targetW,targetH),valid);
     const variMean=mean(vv),gliMean=mean(gg),uniform=clamp(100*(1-mean([sd(vv),sd(gg),sd(ee)])/.20),0,100),lowRate=lowCount/vv.length*100,brownRate=brownCount/vv.length*100;
     let dryIndex;
-    if(species==="ベント芝")dryIndex=.34*lowRate+.20*(100-uniform)+.34*clamp((.055-variMean)*820,0,100)+.18*clamp((.085-gliMean)*700,0,100)+.10*brownRate;
-    else if(species==="コウライ芝")dryIndex=.22*lowRate+.30*(100-uniform)+.28*clamp((.025-variMean)*620,0,100)+.12*brownRate;
+    if(species==="????")dryIndex=.34*lowRate+.20*(100-uniform)+.34*clamp((.055-variMean)*820,0,100)+.18*clamp((.085-gliMean)*700,0,100)+.10*brownRate;
+    else if(species==="?????")dryIndex=.22*lowRate+.30*(100-uniform)+.28*clamp((.025-variMean)*620,0,100)+.12*brownRate;
     else dryIndex=.20*lowRate+.24*(100-uniform)+.25*clamp((.045-variMean)*560,0,100)+.16*brownRate;
     dryIndex=clamp(dryIndex,0,100);const L=pre.limits;const grade=dryIndex<L[0]?"A":dryIndex<L[1]?"B":dryIndex<L[2]?"C":"D";
     const diseaseMismatch=(brownRate>5&&dryIndex<38&&variMean<pre.vari&&gliMean>pre.gli*.75)||(lowRate>18&&uniform>72&&dryIndex<45&&Math.abs(variMean-pre.vari)<.035);
     lastResult={image,classes,valid,w:targetW,h:targetH,grade,variMean,gliMean,dryIndex,lowRate,diseaseMismatch};render(lastResult);
     $("grade").textContent=grade;$("vari").textContent=variMean.toFixed(3);$("gli").textContent=gliMean.toFixed(3);$("dry").textContent=Math.round(dryIndex);$("low").textContent=lowRate.toFixed(1)+"%";
     $("diseaseHint").classList.toggle("hidden",!diseaseMismatch);
-    setMessage(grade==="A"?"概ね良好です":grade==="B"?"要観察箇所があります":grade==="C"?"ドライ予兆・低活性反応があります":"反応が強い場所を現地確認してください");
-  }catch(e){setMessage("解析エラー："+e.message)}
+    setMessage(grade==="A"?"??????":grade==="B"?"??????????":grade==="C"?"????????????????":"??????????????????");
+  }catch(e){setMessage("??????"+e.message)}
   schedule();
 }
 
-function alphaForClass(cls,base,mode){
-  if(mode==="redOnly")return cls<2?0:(cls===2?base*.78:Math.min(.88,base*1.18));
-  if(mode==="all")return [base*.10,base*.28,base*.72,Math.min(.86,base*1.15)][cls];
-  return [base*.04,base*.14,base*.72,Math.min(.86,base*1.15)][cls];
+const DISPLAY_MODE_NAMES={original:"???",outline:"????",surface:"???",heatmap:"??????"};
+let displayMode="heatmap",modeToastTimer=null;
+
+function alphaForClass(cls,base){
+  return [Math.max(.40,base-.12),Math.max(.42,base-.08),Math.max(.46,base-.04),base][cls];
+}
+
+function makeColorSurface(r,alphaScale=1){
+  const surface=document.createElement("canvas");surface.width=r.w;surface.height=r.h;
+  const c=surface.getContext("2d"),im=c.createImageData(r.w,r.h);
+  const colors=[[33,164,83],[255,227,74],[255,138,28],[225,38,38]],base=clamp(Number($("opacity").value)/100,.40,.60);
+  for(let i=0,j=0;i<r.classes.length;i++,j+=4){
+    if(!r.valid[i])continue;
+    const cls=r.classes[i],col=colors[cls],a=alphaForClass(cls,base)*alphaScale;
+    im.data[j]=col[0];im.data[j+1]=col[1];im.data[j+2]=col[2];im.data[j+3]=Math.round(clamp(a,0,1)*255);
+  }
+  c.putImageData(im,0,0);
+  return surface;
+}
+
+function makeOutlineMap(r){
+  const map=document.createElement("canvas");map.width=r.w;map.height=r.h;
+  const c=map.getContext("2d"),edge=document.createElement("canvas");edge.width=r.w;edge.height=r.h;
+  const ectx=edge.getContext("2d"),im=ectx.createImageData(r.w,r.h),colors=[[33,164,83],[255,227,74],[255,138,28],[225,38,38]];
+  for(let y=0;y<r.h;y++)for(let x=0;x<r.w;x++){
+    const i=y*r.w+x;if(!r.valid[i])continue;
+    const cls=r.classes[i];
+    const boundary=x===0||y===0||x===r.w-1||y===r.h-1||
+      !r.valid[i-1]||!r.valid[i+1]||!r.valid[i-r.w]||!r.valid[i+r.w]||
+      r.classes[i-1]!==cls||r.classes[i+1]!==cls||r.classes[i-r.w]!==cls||r.classes[i+r.w]!==cls;
+    if(!boundary)continue;
+    const j=i*4,col=colors[cls];im.data[j]=col[0];im.data[j+1]=col[1];im.data[j+2]=col[2];im.data[j+3]=255;
+  }
+  ectx.putImageData(im,0,0);
+  c.shadowColor="rgba(0,0,0,.9)";c.shadowBlur=2;c.drawImage(edge,0,0);
+  c.shadowColor="transparent";c.drawImage(edge,0,0);
+  return map;
 }
 
 function makeMap(r){
-  const map=document.createElement("canvas");map.width=r.w;map.height=r.h;const c=map.getContext("2d"),im=c.createImageData(r.w,r.h);
-  const colors=[[33,164,83],[255,227,74],[255,138,28],[225,38,38]],base=Number($("opacity").value)/100,mode=$("displayMode").value;
-  for(let i=0,j=0;i<r.classes.length;i++,j+=4){
-    if(!r.valid[i])continue;const cls=r.classes[i],col=colors[cls],a=alphaForClass(cls,base,mode);
-    im.data[j]=col[0];im.data[j+1]=col[1];im.data[j+2]=col[2];im.data[j+3]=Math.round(a*255);
-  }
-  c.putImageData(im,0,0);
-  // 赤いまとまりの輪郭を白で強調
-  c.strokeStyle=`rgba(255,255,255,${Math.min(.75,base+.15)})`;c.lineWidth=1;
-  for(let y=0;y<r.h;y++)for(let x=0;x<r.w;x++){
-    const i=y*r.w+x;if(r.classes[i]!==3||!r.valid[i])continue;
-    const left=x===0||r.classes[i-1]!==3,right=x===r.w-1||r.classes[i+1]!==3,top=y===0||r.classes[i-r.w]!==3,bottom=y===r.h-1||r.classes[i+r.w]!==3;
-    c.beginPath();if(top){c.moveTo(x,y);c.lineTo(x+1,y)}if(right){c.moveTo(x+1,y);c.lineTo(x+1,y+1)}if(bottom){c.moveTo(x+1,y+1);c.lineTo(x,y+1)}if(left){c.moveTo(x,y+1);c.lineTo(x,y)}c.stroke();
-  }
-  return map;
+  const blank=document.createElement("canvas");blank.width=r.w;blank.height=r.h;
+  if(displayMode==="original")return blank;
+  if(displayMode==="outline")return makeOutlineMap(r);
+  const surface=makeColorSurface(r);
+  if(displayMode==="surface")return surface;
+  const c=blank.getContext("2d");c.filter="blur(2.2px)";c.drawImage(surface,0,0);c.filter="none";
+  return blank;
+}
+
+function showModeToast(name){
+  const toast=$("modeToast");clearTimeout(modeToastTimer);
+  toast.textContent=`${name}???????`;toast.classList.remove("hidden");
+  modeToastTimer=setTimeout(()=>toast.classList.add("hidden"),2000);
+}
+
+function setDisplayMode(mode,notify=true){
+  if(!DISPLAY_MODE_NAMES[mode])return;
+  displayMode=mode;
+  document.querySelectorAll(".mode-switcher button").forEach(button=>{
+    const selected=button.dataset.mode===mode;
+    button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected));
+  });
+  $("currentMode").textContent=`???${DISPLAY_MODE_NAMES[mode]}`;
+  if(notify)showModeToast(DISPLAY_MODE_NAMES[mode]);
+  if(lastResult)render(lastResult);
 }
 
 function render(r){
@@ -152,22 +195,24 @@ async function saveScreen(){
   const c=document.createElement("canvas"),w=Math.max(720,video.videoWidth||1280),h=Math.max(1280,video.videoHeight||720);c.width=w;c.height=h;const x=c.getContext("2d");
   drawVideoCover(x,w,h);x.drawImage(makeMap(lastResult),0,0,lastResult.w,lastResult.h,0,0,w,h);
   x.fillStyle="rgba(0,0,0,.68)";x.fillRect(0,0,w,86);x.fillStyle="white";x.font=`bold ${Math.max(24,Math.round(w*.025))}px sans-serif`;
-  x.fillText(`Turf Vision Live  判定 ${lastResult.grade}  ドライ ${Math.round(lastResult.dryIndex)}/100`,18,38);
-  x.font=`${Math.max(18,Math.round(w*.017))}px sans-serif`;x.fillText(`低活性 ${lastResult.lowRate.toFixed(1)}%  VARI ${lastResult.variMean.toFixed(3)}  GLI ${lastResult.gliMean.toFixed(3)}`,18,70);
-  const blob=await new Promise(resolve=>c.toBlob(resolve,"image/png"));if(!blob){setMessage("保存画像を作成できませんでした。");return}
+  x.fillText(`Turf Vision Live  ?? ${lastResult.grade}  ??? ${Math.round(lastResult.dryIndex)}/100`,18,38);
+  x.font=`${Math.max(18,Math.round(w*.017))}px sans-serif`;x.fillText(`??? ${lastResult.lowRate.toFixed(1)}%  VARI ${lastResult.variMean.toFixed(3)}  GLI ${lastResult.gliMean.toFixed(3)}`,18,70);
+  const blob=await new Promise(resolve=>c.toBlob(resolve,"image/png"));if(!blob){setMessage("????????????????");return}
   const name=`Turf_Vision_Live_${new Date().toISOString().replace(/[:.]/g,"-")}.png`,file=new File([blob],name,{type:"image/png"});
   try{
-    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Turf Vision Live 診断画像"});setMessage("共有先からフォトまたはファイルへ保存できます。");return}
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Turf Vision Live ????"});setMessage("???????????????????????");return}
   }catch(e){if(e.name==="AbortError")return}
-  const url=URL.createObjectURL(blob),link=document.createElement("a");link.download=name;link.href=url;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);setMessage("画像をダウンロードしました。");
+  const url=URL.createObjectURL(blob),link=document.createElement("a");link.download=name;link.href=url;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);setMessage("??????????????");
 }
 
 $("startBtn").onclick=()=>stream?stopCamera():startCamera();
-$("pauseBtn").onclick=()=>{paused=!paused;$("pauseBtn").textContent=paused?"再開":"一時停止";setMessage(paused?"解析を一時停止しました。近くで確認できます。":"解析を再開しました。");if(!paused)schedule()};
+$("pauseBtn").onclick=()=>{paused=!paused;$("pauseBtn").textContent=paused?"??":"????";setMessage(paused?"??????????????????????":"??????????");if(!paused)schedule()};
 $("saveBtn").onclick=saveScreen;
 $("opacity").oninput=e=>{$("opacityValue").textContent=e.target.value+"%";if(lastResult)render(lastResult)};
-$("displayMode").onchange=()=>{if(lastResult)render(lastResult)};
+document.querySelectorAll(".mode-switcher button").forEach(button=>button.onclick=()=>setDisplayMode(button.dataset.mode));
+setDisplayMode("heatmap",false);
 $("species").onchange=()=>{temporalClasses=null};
 $("lightMode").onchange=()=>{temporalClasses=null};
 window.addEventListener("resize",()=>lastResult?render(lastResult):resizeOverlay());window.addEventListener("pagehide",stopCamera);
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+

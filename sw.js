@@ -1,4 +1,4 @@
-const CACHE = "turf-vision-live-v110";
+const CACHE = "turf-vision-live-v130";
 const ASSETS = ["./", "./index.html", "./app.js", "./ar.html", "./ar.css", "./ar.js", "./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 
 self.addEventListener("install", event => {
@@ -42,3 +42,4 @@ self.addEventListener("fetch", event => {
   }
   event.respondWith(caches.match(request).then(cached=>cached||fetch(request)));
 });
+
