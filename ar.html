@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#102d24">
-  <title>Turf Vision Live?AR?????</title>
+  <title>Turf Vision Live｜AR現場巡回版</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="ar.css?v=130">
 </head>
@@ -17,59 +17,59 @@
     <header class="topbar">
       <div>
         <div class="brand">Turf Vision Live</div>
-        <div class="sub">Ver1.3 AR?????</div>
+        <div class="sub">Ver1.3 AR現場巡回版</div>
       </div>
-      <a href="index.html" class="back">????</a>
+      <a href="index.html" class="back">通常診断</a>
     </header>
 
     <section class="metrics">
-      <div><span>??</span><b id="grade">?</b></div>
-      <div><span>VARI</span><b id="vari">?</b></div>
-      <div><span>GLI</span><b id="gli">?</b></div>
-      <div><span>???</span><b id="dry">?</b></div>
-      <div><span>???</span><b id="low">?</b></div>
+      <div><span>判定</span><b id="grade">–</b></div>
+      <div><span>VARI</span><b id="vari">–</b></div>
+      <div><span>GLI</span><b id="gli">–</b></div>
+      <div><span>ドライ</span><b id="dry">–</b></div>
+      <div><span>低活性</span><b id="low">–</b></div>
     </section>
 
-    <div id="currentMode" class="current-mode">?????????</div>
+    <div id="currentMode" class="current-mode">表示：ヒートマップ</div>
     <div id="modeToast" class="mode-toast hidden" role="status" aria-live="polite"></div>
-    <div id="diseaseHint" class="disease-hint hidden">??????????????????????</div>
-    <div id="message" class="message">????????????????</div>
+    <div id="diseaseHint" class="disease-hint hidden">病害疑い：ドライ型とは異なる数値パターンです</div>
+    <div id="message" class="message">「カメラ開始」を押してください。</div>
 
     <section class="panel">
       <div class="row two">
-        <label>??
+        <label>芝種
           <select id="species">
-            <option>????</option>
-            <option>?????</option>
-            <option>???????????</option>
+            <option>ベント芝</option>
+            <option>コウライ芝</option>
+            <option>ティフトン・バミューダ</option>
           </select>
         </label>
-        <label>????
+        <label>撮影補正
           <select id="lightMode">
-            <option value="standard">??</option>
-            <option value="shade">??</option>
-            <option value="sun">?????</option>
+            <option value="standard">標準</option>
+            <option value="shade">日陰</option>
+            <option value="sun">強い日差し</option>
           </select>
         </label>
       </div>
 
-      <div class="mode-switcher" role="group" aria-label="?????">
-        <button type="button" data-mode="original" aria-pressed="false">???</button>
-        <button type="button" data-mode="outline" aria-pressed="false">????</button>
-        <button type="button" data-mode="surface" aria-pressed="false">???</button>
-        <button type="button" data-mode="heatmap" class="active" aria-pressed="true">??????</button>
+      <div class="mode-switcher" role="group" aria-label="表示モード">
+        <button type="button" data-mode="original" aria-pressed="false">元画像</button>
+        <button type="button" data-mode="outline" aria-pressed="false">輪郭表示</button>
+        <button type="button" data-mode="surface" aria-pressed="false">面表示</button>
+        <button type="button" data-mode="heatmap" class="active" aria-pressed="true">ヒートマップ</button>
       </div>
-      <label class="opacity-label">???? <b id="opacityValue">52%</b>
+      <label class="opacity-label">表示濃度 <b id="opacityValue">52%</b>
         <input id="opacity" type="range" min="40" max="60" value="52">
       </label>
 
-      <div class="legend" aria-label="???"><i class="good"></i>?? <i class="watch"></i>??? <i class="pre"></i>????? <i class="severe"></i>????</div>
+      <div class="legend" aria-label="色凡例"><i class="good"></i>良好 <i class="watch"></i>要観察 <i class="pre"></i>ドライ予兆 <i class="severe"></i>ドライ強</div>
       <div class="buttons">
-        <button id="startBtn">?????</button>
-        <button id="pauseBtn" disabled>????</button>
-        <button id="saveBtn" disabled>????</button>
+        <button id="startBtn">カメラ開始</button>
+        <button id="pauseBtn" disabled>一時停止</button>
+        <button id="saveBtn" disabled>画面保存</button>
       </div>
-      <p>???????????????????????????????????????????????????????????</p>
+      <p>外周をゆっくり歩き、赤・オレンジが現れた場所へ近づいて目視確認してください。病害名や原因を確定するものではありません。</p>
     </section>
   </main>
   <script src="ar.js?v=130"></script>
