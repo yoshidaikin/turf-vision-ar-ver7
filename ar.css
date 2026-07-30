@@ -20,3 +20,29 @@ video,#overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:cover
 .legend i{width:16px!important;height:16px!important}
 @media(max-height:740px){.current-mode{top:128px;font-size:14px;padding:6px 14px}.mode-toast{top:168px}.mode-switcher{gap:6px;margin-top:6px}.mode-switcher button{min-height:42px;font-size:14px}.opacity-label{margin-top:6px}.legend{font-size:11px!important;margin:6px 0!important}}
 
+/* Ver1.4 現場実証版：屋外で重ならず読める表示配置 */
+.current-mode{top:136px;min-width:190px;text-align:center}
+.message{top:181px;max-width:calc(100% - 24px)}
+.disease-hint{top:224px}
+.mode-toast{top:50%;transform:translate(-50%,-50%);max-width:calc(100% - 28px);white-space:normal}
+.mode-switcher button{min-height:50px}
+.panel p{font-size:11px;font-weight:700;opacity:.9}
+
+@media(max-width:390px){
+  .metrics{left:6px;right:6px;gap:3px}
+  .metrics div{padding:6px 1px}
+  .metrics span{font-size:9px}
+  .metrics b{font-size:15px}
+  .panel{left:5px;right:5px;padding:8px}
+  .mode-switcher{gap:6px;margin-top:7px}
+  .mode-switcher button{min-height:44px;font-size:14px}
+  .legend{font-size:10px!important;gap:3px!important;margin:6px 0!important}
+}
+
+@media(max-height:740px){
+  .current-mode{top:126px}
+  .message{top:164px}
+  .disease-hint{top:202px}
+  .mode-toast{top:43%}
+  .panel p{display:none}
+}

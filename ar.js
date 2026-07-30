@@ -105,7 +105,10 @@ function analyzeFrame(){
     else dryIndex=.20*lowRate+.24*(100-uniform)+.25*clamp((.045-variMean)*560,0,100)+.16*brownRate;
     dryIndex=clamp(dryIndex,0,100);const L=pre.limits;const grade=dryIndex<L[0]?"A":dryIndex<L[1]?"B":dryIndex<L[2]?"C":"D";
     const diseaseMismatch=(brownRate>5&&dryIndex<38&&variMean<pre.vari&&gliMean>pre.gli*.75)||(lowRate>18&&uniform>72&&dryIndex<45&&Math.abs(variMean-pre.vari)<.035);
-    lastResult={image,classes,valid,w:targetW,h:targetH,grade,variMean,gliMean,dryIndex,lowRate,diseaseMismatch};render(lastResult);
+    // 将来のSHIBA指数用入力。現時点では表示・診断結果へ一切使用しない。
+    const shibaInputs=buildShibaInputs({vari:variMean,gli:gliMean,dryScore:dryIndex,lowActivity:lowRate,grade});
+    const displayClasses=prepareDisplayClasses(classes,valid,targetW,targetH);
+    lastResult={image,classes,displayClasses,valid,w:targetW,h:targetH,grade,variMean,gliMean,dryIndex,lowRate,diseaseMismatch,shibaInputs};render(lastResult);
     $("grade").textContent=grade;$("vari").textContent=variMean.toFixed(3);$("gli").textContent=gliMean.toFixed(3);$("dry").textContent=Math.round(dryIndex);$("low").textContent=lowRate.toFixed(1)+"%";
     $("diseaseHint").classList.toggle("hidden",!diseaseMismatch);
     setMessage(grade==="A"?"概ね良好です":grade==="B"?"要観察箇所があります":grade==="C"?"ドライ予兆・低活性反応があります":"反応が強い場所を現地確認してください");
@@ -116,17 +119,86 @@ function analyzeFrame(){
 const DISPLAY_MODE_NAMES={original:"元画像",outline:"輪郭表示",surface:"面表示",heatmap:"ヒートマップ"};
 let displayMode="heatmap",modeToastTimer=null;
 
-function alphaForClass(cls,base){
-  return [Math.max(.40,base-.12),Math.max(.42,base-.08),Math.max(.46,base-.04),base][cls];
+function buildShibaInputs({vari,gli,dryScore,lowActivity,grade}){
+  // 将来のSHIBA指数実装用。返却値は現在の診断ロジックでは未使用。
+  return Object.freeze({vari,gli,dryScore,lowActivity,grade});
 }
 
-function makeColorSurface(r,alphaScale=1){
+function blockAggregateClasses(source,valid,w,h,blockSize=3){
+  const out=new Uint8Array(source.length);
+  for(let by=0;by<h;by+=blockSize)for(let bx=0;bx<w;bx+=blockSize){
+    const counts=[0,0,0,0];let validCount=0;
+    for(let y=by;y<Math.min(h,by+blockSize);y++)for(let x=bx;x<Math.min(w,bx+blockSize);x++){
+      const i=y*w+x;if(valid[i]){counts[source[i]]++;validCount++}
+    }
+    if(!validCount)continue;
+    let cls=0;
+    // 赤は強反応が複数あるブロックだけ。橙・黄は面として続く反応を優先する。
+    if(counts[3]>=Math.max(2,Math.ceil(validCount*.28)))cls=3;
+    else if(counts[2]+counts[3]>=Math.max(2,Math.ceil(validCount*.34)))cls=2;
+    else if(counts[1]+counts[2]+counts[3]>=Math.max(2,Math.ceil(validCount*.42)))cls=1;
+    for(let y=by;y<Math.min(h,by+blockSize);y++)for(let x=bx;x<Math.min(w,bx+blockSize);x++){
+      const i=y*w+x;if(valid[i])out[i]=cls;
+    }
+  }
+  return out;
+}
+
+function smoothDisplayClasses(source,valid,w,h){
+  const out=new Uint8Array(source.length);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=y*w+x;if(!valid[i])continue;
+    const counts=[0,0,0,0];let total=0;
+    for(let yy=Math.max(0,y-1);yy<=Math.min(h-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(w-1,x+1);xx++){
+      const j=yy*w+xx;if(valid[j]){counts[source[j]]++;total++}
+    }
+    if(counts[3]>=4)out[i]=3;
+    else if(counts[2]+counts[3]>=Math.max(4,Math.ceil(total*.48)))out[i]=2;
+    else if(counts[1]+counts[2]+counts[3]>=Math.max(4,Math.ceil(total*.55)))out[i]=1;
+    else out[i]=0;
+  }
+  return out;
+}
+
+function removeSmallDisplayRegions(source,valid,w,h){
+  const out=new Uint8Array(source),visited=new Uint8Array(source.length),queue=new Int32Array(source.length);
+  const minimum=[0,18,12,9];
+  for(let start=0;start<source.length;start++){
+    const cls=source[start];if(!valid[start]||cls===0||visited[start])continue;
+    let head=0,tail=0;queue[tail++]=start;visited[start]=1;
+    while(head<tail){
+      const i=queue[head++],x=i%w,y=Math.floor(i/w);
+      const neighbors=[x>0?i-1:-1,x<w-1?i+1:-1,y>0?i-w:-1,y<h-1?i+w:-1];
+      for(const j of neighbors)if(j>=0&&!visited[j]&&valid[j]&&source[j]===cls){visited[j]=1;queue[tail++]=j}
+    }
+    if(tail<minimum[cls]){
+      const fallback=cls===3?2:0;
+      for(let k=0;k<tail;k++)out[queue[k]]=fallback;
+    }
+  }
+  return out;
+}
+
+function prepareDisplayClasses(source,valid,w,h){
+  // 診断クラスは変更せず、描画専用コピーだけを低負荷でまとめる。
+  const blocked=blockAggregateClasses(source,valid,w,h,3);
+  const smoothed=smoothDisplayClasses(blocked,valid,w,h);
+  return removeSmallDisplayRegions(smoothed,valid,w,h);
+}
+
+function alphaForClass(cls,base,mode){
+  const scales=mode==="surface"?[.14,.40,.76,1]:[.10,.38,.74,1];
+  return clamp(base*scales[cls],0,.58);
+}
+
+function makeColorSurface(r,mode){
   const surface=document.createElement("canvas");surface.width=r.w;surface.height=r.h;
   const c=surface.getContext("2d"),im=c.createImageData(r.w,r.h);
   const colors=[[33,164,83],[255,227,74],[255,138,28],[225,38,38]],base=clamp(Number($("opacity").value)/100,.40,.60);
-  for(let i=0,j=0;i<r.classes.length;i++,j+=4){
+  const classes=r.displayClasses||r.classes;
+  for(let i=0,j=0;i<classes.length;i++,j+=4){
     if(!r.valid[i])continue;
-    const cls=r.classes[i],col=colors[cls],a=alphaForClass(cls,base)*alphaScale;
+    const cls=classes[i],col=colors[cls],a=alphaForClass(cls,base,mode);
     im.data[j]=col[0];im.data[j+1]=col[1];im.data[j+2]=col[2];im.data[j+3]=Math.round(clamp(a,0,1)*255);
   }
   c.putImageData(im,0,0);
@@ -135,20 +207,25 @@ function makeColorSurface(r,alphaScale=1){
 
 function makeOutlineMap(r){
   const map=document.createElement("canvas");map.width=r.w;map.height=r.h;
-  const c=map.getContext("2d"),edge=document.createElement("canvas");edge.width=r.w;edge.height=r.h;
-  const ectx=edge.getContext("2d"),im=ectx.createImageData(r.w,r.h),colors=[[33,164,83],[255,227,74],[255,138,28],[225,38,38]];
-  for(let y=0;y<r.h;y++)for(let x=0;x<r.w;x++){
-    const i=y*r.w+x;if(!r.valid[i])continue;
-    const cls=r.classes[i];
-    const boundary=x===0||y===0||x===r.w-1||y===r.h-1||
-      !r.valid[i-1]||!r.valid[i+1]||!r.valid[i-r.w]||!r.valid[i+r.w]||
-      r.classes[i-1]!==cls||r.classes[i+1]!==cls||r.classes[i-r.w]!==cls||r.classes[i+r.w]!==cls;
-    if(!boundary)continue;
-    const j=i*4,col=colors[cls];im.data[j]=col[0];im.data[j+1]=col[1];im.data[j+2]=col[2];im.data[j+3]=255;
+  const c=map.getContext("2d"),classes=r.displayClasses||r.classes;
+  const colors={1:[255,227,74],2:[255,138,28],3:[225,38,38]},radii={1:0,2:1,3:2};
+  c.shadowColor="rgba(0,0,0,.88)";c.shadowBlur=1.5;
+  for(const cls of [1,2,3]){
+    const edge=document.createElement("canvas");edge.width=r.w;edge.height=r.h;
+    const ectx=edge.getContext("2d"),im=ectx.createImageData(r.w,r.h),col=colors[cls];
+    for(let y=0;y<r.h;y++)for(let x=0;x<r.w;x++){
+      const i=y*r.w+x;if(!r.valid[i]||classes[i]!==cls)continue;
+      const boundary=x===0||y===0||x===r.w-1||y===r.h-1||
+        !r.valid[i-1]||!r.valid[i+1]||!r.valid[i-r.w]||!r.valid[i+r.w]||
+        classes[i-1]!==cls||classes[i+1]!==cls||classes[i-r.w]!==cls||classes[i+r.w]!==cls;
+      if(!boundary)continue;
+      const j=i*4;im.data[j]=col[0];im.data[j+1]=col[1];im.data[j+2]=col[2];im.data[j+3]=245;
+    }
+    ectx.putImageData(im,0,0);
+    const radius=radii[cls];
+    for(let oy=-radius;oy<=radius;oy++)for(let ox=-radius;ox<=radius;ox++)if(ox*ox+oy*oy<=radius*radius)c.drawImage(edge,ox,oy);
   }
-  ectx.putImageData(im,0,0);
-  c.shadowColor="rgba(0,0,0,.9)";c.shadowBlur=2;c.drawImage(edge,0,0);
-  c.shadowColor="transparent";c.drawImage(edge,0,0);
+  c.shadowColor="transparent";
   return map;
 }
 
@@ -156,16 +233,19 @@ function makeMap(r){
   const blank=document.createElement("canvas");blank.width=r.w;blank.height=r.h;
   if(displayMode==="original")return blank;
   if(displayMode==="outline")return makeOutlineMap(r);
-  const surface=makeColorSurface(r);
+  const surface=makeColorSurface(r,displayMode);
   if(displayMode==="surface")return surface;
-  const c=blank.getContext("2d");c.filter="blur(2.2px)";c.drawImage(surface,0,0);c.filter="none";
+  const c=blank.getContext("2d");
+  c.filter="blur(1.6px)";
+  c.drawImage(surface,0,0);
+  c.filter="none";
   return blank;
 }
 
 function showModeToast(name){
   const toast=$("modeToast");clearTimeout(modeToastTimer);
-  toast.textContent=`${name}に変更しました`;toast.classList.remove("hidden");
-  modeToastTimer=setTimeout(()=>toast.classList.add("hidden"),2000);
+  toast.textContent=`表示：${name}`;toast.classList.remove("hidden");
+  modeToastTimer=setTimeout(()=>toast.classList.add("hidden"),1500);
 }
 
 function setDisplayMode(mode,notify=true){
@@ -215,4 +295,3 @@ $("species").onchange=()=>{temporalClasses=null};
 $("lightMode").onchange=()=>{temporalClasses=null};
 window.addEventListener("resize",()=>lastResult?render(lastResult):resizeOverlay());window.addEventListener("pagehide",stopCamera);
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-
