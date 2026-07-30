@@ -1,0 +1,25 @@
+{
+  "name": "Turf Vision AR 現場実証版",
+  "short_name": "Turf Vision AR",
+  "start_url": "./ar.html?v=150",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07110d",
+  "theme_color": "#102d24",
+  "icons": [
+    {
+      "src": "ar-icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "ar-icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "id": "./ar.html",
+  "description": "ゴルフ場の芝生状態をカメラ映像上で確認するTurf Vision AR現場実証版"
+}
