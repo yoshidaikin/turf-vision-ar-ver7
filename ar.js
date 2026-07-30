@@ -293,5 +293,36 @@ document.querySelectorAll(".mode-switcher button").forEach(button=>button.onclic
 setDisplayMode("heatmap",false);
 $("species").onchange=()=>{temporalClasses=null};
 $("lightMode").onchange=()=>{temporalClasses=null};
+
+// Ver1.5 UI制御。診断値・解析処理には関与しない表示専用機能。
+const stage=document.querySelector(".stage"),controlPanel=$("controlPanel"),panelToggle=$("panelToggle");
+let uiIdleTimer=null;
+function setPanelExpanded(expanded){
+  controlPanel.classList.toggle("expanded",expanded);
+  controlPanel.classList.toggle("collapsed",!expanded);
+  panelToggle.setAttribute("aria-expanded",String(expanded));
+  panelToggle.textContent=expanded?"閉じる":"開く";
+}
+function scheduleUiIdle(){
+  clearTimeout(uiIdleTimer);
+  uiIdleTimer=setTimeout(()=>{
+    setPanelExpanded(false);
+    stage.classList.add("ui-idle");
+  },4500);
+}
+function revealUi(){
+  stage.classList.remove("ui-idle");
+  scheduleUiIdle();
+}
+panelToggle.onclick=event=>{
+  event.stopPropagation();
+  const willExpand=controlPanel.classList.contains("collapsed");
+  setPanelExpanded(willExpand);
+  revealUi();
+};
+window.addEventListener("pointerdown",revealUi,{passive:true});
+window.addEventListener("keydown",revealUi);
+revealUi();
+
 window.addEventListener("resize",()=>lastResult?render(lastResult):resizeOverlay());window.addEventListener("pagehide",stopCamera);
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});

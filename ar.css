@@ -46,3 +46,49 @@ video,#overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:cover
   .mode-toast{top:43%}
   .panel p{display:none}
 }
+
+/* Ver1.5 現場実証版：映像を常に70%以上確保するコンパクトUI */
+.topbar,.metrics,.current-mode,.message,.disease-hint,.panel{
+  transition:opacity .35s ease,transform .35s ease,background-color .35s ease
+}
+.topbar{padding:max(8px,env(safe-area-inset-top)) 11px 7px}
+.brand{font-size:17px}.sub{font-size:10px}.back{padding:5px 8px;font-size:11px}
+.metrics{top:58px;left:6px;right:6px;gap:3px}
+.metrics div{padding:3px 1px;border-radius:7px}
+.metrics span{font-size:8px;line-height:1.1}.metrics b{font-size:13px;line-height:1.1;margin-top:1px}
+.current-mode{top:104px;min-width:154px;padding:5px 12px;font-size:13px;border-width:1px}
+.message{top:137px;padding:5px 9px;font-size:11px}
+.disease-hint{top:170px;padding:5px 9px;font-size:11px}
+.panel{
+  left:5px;right:5px;bottom:max(5px,env(safe-area-inset-bottom));
+  max-height:30vh;padding:6px 8px 8px;border-radius:12px;overflow:auto;
+  overscroll-behavior:contain
+}
+.panel-handle{display:flex;align-items:center;justify-content:space-between;min-height:32px;font-size:13px;font-weight:900}
+.panel-handle button{min-height:30px;padding:4px 12px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:#ff8a1c;color:#111;font-weight:900}
+.panel-content{display:block}
+.panel.collapsed{max-height:46px;overflow:hidden;padding-bottom:6px}
+.panel.collapsed .panel-content{display:none}
+.row.two{gap:5px}select{height:31px;margin-top:2px;font-size:12px}
+.mode-switcher{grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+.mode-switcher button{min-height:34px;padding:2px;font-size:11px;border-width:1px;border-radius:7px}
+.mode-switcher button.active{box-shadow:0 0 0 2px rgba(255,138,28,.35)}
+.opacity-label{margin-top:5px;font-size:11px}
+input[type=range]{margin-top:3px;height:14px}
+.legend{font-size:9px!important;gap:2px!important;margin:3px 0 4px!important}
+.legend i{width:10px!important;height:10px!important;margin-left:3px}
+.buttons{gap:5px}.buttons button{min-height:36px;font-size:12px}
+.panel p{font-size:9px;line-height:1.3;margin-top:4px}
+.stage.ui-idle .topbar,.stage.ui-idle .metrics,.stage.ui-idle .current-mode,
+.stage.ui-idle .message,.stage.ui-idle .disease-hint{opacity:.18}
+.stage.ui-idle .panel{opacity:.34}
+.stage.ui-idle .topbar,.stage.ui-idle .metrics,.stage.ui-idle .current-mode,
+.stage.ui-idle .message,.stage.ui-idle .disease-hint,.stage.ui-idle .panel{pointer-events:none}
+
+@media(min-width:700px){
+  .panel{max-width:650px;max-height:30vh}
+}
+@media(max-height:740px){
+  .metrics{top:54px}.current-mode{top:96px}.message{top:128px}.disease-hint{top:158px}
+  .panel{max-height:29vh}.panel p{display:none}
+}

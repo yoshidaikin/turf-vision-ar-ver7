@@ -4,9 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#102d24">
-  <title>Turf Vision Live｜AR現場巡回版</title>
+  <title>Turf Vision Live｜Ver1.5 AR現場実証版</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="ar.css?v=140">
+  <link rel="icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="ar.css?v=150">
 </head>
 <body>
   <main class="stage">
@@ -17,7 +20,7 @@
     <header class="topbar">
       <div>
         <div class="brand">Turf Vision Live</div>
-        <div class="sub">Ver1.4 AR現場実証版</div>
+        <div class="sub">Ver1.5 AR現場実証版</div>
       </div>
       <a href="index.html" class="back">通常診断</a>
     </header>
@@ -35,8 +38,13 @@
     <div id="diseaseHint" class="disease-hint hidden">病害疑い：ドライ型とは異なる数値パターンです</div>
     <div id="message" class="message">「カメラ開始」を押してください。</div>
 
-    <section class="panel">
-      <div class="row two">
+    <section id="controlPanel" class="panel expanded" aria-label="操作パネル">
+      <div class="panel-handle">
+        <span>操作パネル</span>
+        <button id="panelToggle" type="button" aria-expanded="true" aria-controls="panelContent">閉じる</button>
+      </div>
+      <div id="panelContent" class="panel-content">
+       <div class="row two">
         <label>芝種
           <select id="species">
             <option>ベント芝</option>
@@ -69,9 +77,10 @@
         <button id="pauseBtn" disabled>一時停止</button>
         <button id="saveBtn" disabled>画面保存</button>
       </div>
-      <p>グリーン上をゆっくり歩き、赤・オレンジの場所を目視確認してください。病害名や原因を確定するものではありません。</p>
+        <p>グリーン上をゆっくり歩き、赤・オレンジの場所を目視確認してください。病害名や原因を確定するものではありません。</p>
+      </div>
     </section>
   </main>
-  <script src="ar.js?v=140"></script>
+  <script src="ar.js?v=150"></script>
 </body>
 </html>

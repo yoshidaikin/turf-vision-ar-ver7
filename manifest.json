@@ -1,24 +1,25 @@
 {
-  "name": "Turf Vision ゴルフ場芝生RGB簡易診断",
-  "short_name": "Turf Vision",
-  "start_url": "./?v=700",
+  "name": "Turf Vision AR 現場実証版",
+  "short_name": "Turf Vision AR",
+  "start_url": "./ar.html?v=150",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7f6",
-  "theme_color": "#1f4e3d",
+  "background_color": "#07110d",
+  "theme_color": "#102d24",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
-  "id": "./",
-  "description": "ゴルフ場芝生の状態を端末内で解析するRGB簡易診断アプリ"
+  "id": "./ar.html",
+  "description": "ゴルフ場の芝生状態をカメラ映像上で確認するTurf Vision AR現場実証版"
 }

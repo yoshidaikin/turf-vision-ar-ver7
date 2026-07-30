@@ -1,5 +1,5 @@
-const CACHE = "turf-vision-live-v140";
-const ASSETS = ["./", "./index.html", "./app.js", "./ar.html", "./ar.css", "./ar.js", "./manifest.json", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
+const CACHE = "turf-vision-live-v150";
+const ASSETS = ["./", "./index.html", "./app.js", "./ar.html", "./ar.css", "./ar.js", "./manifest.json", "./favicon.ico", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 
 self.addEventListener("install", event => {
   self.skipWaiting();
